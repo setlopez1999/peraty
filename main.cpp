@@ -37,19 +37,30 @@ int WINAPI WinMain (HINSTANCE hThisInstance,
     wincl.lpszMenuName = NULL;                 /* No menu */
     wincl.cbClsExtra = 0;                      /* No extra bytes after the window class */
     wincl.cbWndExtra = 0;                      /* structure or the window instance */
-    /* Use Windows's default colour as the background of the window */
-    wincl.hbrBackground = (HBRUSH) COLOR_BACKGROUND;
+    /* Color de fondo de la ventana*/
+    //wincl.hbrBackground = (HBRUSH) COLOR_BACKGROUND;
+    wincl.hbrBackground = CreateSolidBrush(RGB(30,30,30));
 
     /* Register the window class, and if it fails quit the program */
     if (!RegisterClassEx (&wincl))
         return 0;
 
-    /* The class is registered, let's create the program*/
+    /* Clase registrada, ajustes del programa*/
     hwnd = CreateWindowEx (
-           0,                   /* Extended possibilites for variation */
+           WS_EX_TOOLWINDOW | WS_EX_TOPMOST,
+           // WS_EX_TOOLWINDOW - La ventana no aparece en la barra de tareas
+           // WS_EX_TOPMOST - Ventana siempre encima
            szClassName,         /* Classname */
-           _T("Code::Blocks Template Windows App"),       /* Title Text */
-           WS_OVERLAPPEDWINDOW, /* default window */
+           _T("Peraty"),       /* Title Text */
+           WS_POPUP,// Elimina los bordes de cerrar, minimizar, borde grueso.
+           // Amtes tenia WS_OVERLAPPEDWINDOW
+           /* Que integra
+                WS_OVERLAPPED |
+                WS_CAPTION |
+                WS_SYSMENU |
+                WS_THICKFRAME |
+                WS_MINIMIZEBOX |
+                WS_MAXIMIZEBOX    */
            CW_USEDEFAULT,       /* Windows decides the position */
            CW_USEDEFAULT,       /* where the window ends up on the screen */
            544,                 /* The programs width */
@@ -83,6 +94,12 @@ LRESULT CALLBACK WindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM
 {
     switch (message)                  /* handle the messages */
     {
+        // WM_NCHITTEST revisa donde toco el mouse
+        case WM_NCHITTEST: {
+            LRESULT touch = DefWindowProc(hwnd,message,wParam,lParam);
+            if(touch == HTCLIENT)return HTCAPTION;
+            return touch;
+        }
         case WM_DESTROY:
             PostQuitMessage (0);       /* send a WM_QUIT to the message queue */
             break;
